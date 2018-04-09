@@ -2,6 +2,8 @@
 
 const boom = require('boom');
 const uuid = require('uuid/v4');
+const schema = require('screwdriver-data-schema');
+
 
 /**
  * Add a guest route for those who want to be in read-only mode
@@ -42,6 +44,9 @@ function addGuestRoute(server, config) {
                 }
 
                 return reply().redirect('/v4/auth/token');
+            },
+            response: {
+                schema: schema.api.auth.token
             }
         }
     }];
@@ -123,6 +128,9 @@ function addOAuthRoutes(server, config) {
                         return reply().redirect('/v4/auth/token');
                     })
                     .catch(err => reply(boom.wrap(err)));
+            },
+            response: {
+                schema: schema.api.auth.token
             }
         }
     }));
