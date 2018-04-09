@@ -7,7 +7,6 @@ const process = require('process');
 const VError = require('verror');
 const schema = require('screwdriver-data-schema');
 
-
 /**
  * Hapi interface for plugin to return package list
  * @method register

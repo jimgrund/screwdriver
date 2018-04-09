@@ -27,7 +27,7 @@ exports.register = (server, options, next) => {
         handler: (request, reply) => reply({
             executor: executor.stats(),
             scm: scm.stats()
-        }),
+        })
     });
     next();
 };
