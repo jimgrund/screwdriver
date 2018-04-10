@@ -1,7 +1,7 @@
 'use strict';
 
 const createRoute = require('./create');
-const boom = require('boom');
+// const boom = require('boom');
 
 /**
  * Banner API Plugin
