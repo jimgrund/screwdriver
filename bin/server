@@ -29,8 +29,10 @@ const notificationConfig = config.get('notifications');
 // Setup Datastore
 const datastoreConfig = config.get('datastore');
 const DatastorePlugin = require(`screwdriver-datastore-${datastoreConfig.plugin}`);
+winston.info("post to datastore plugin " + " " + datastoreConfig.plugin );
 const datastore = new DatastorePlugin(hoek.applyToDefaults({ ecosystem },
     (datastoreConfig[datastoreConfig.plugin] || {})));
+winston.info("post to datastore object creation");
 
 // Setup Executor
 const executorConfig = config.get('executor');
@@ -107,6 +109,9 @@ const eventFactory = Models.EventFactory.getInstance({
     datastore,
     scm
 });
+const bannerFactory = Models.BannerFactory.getInstance({
+    datastore
+});
 const collectionFactory = Models.CollectionFactory.getInstance({
     datastore
 });
@@ -130,6 +135,7 @@ datastore.setup()
         jobFactory,
         userFactory,
         buildFactory,
+        bannerFactory,
         secretFactory,
         tokenFactory,
         eventFactory,
