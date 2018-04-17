@@ -4,13 +4,33 @@ const assert = require('chai').assert;
 const sinon = require('sinon');
 const hapi = require('hapi');
 const mockery = require('mockery');
+const testBanner = require('./data/banner.json');
 
 sinon.assert.expose(assert, { prefix: '' });
+
+const getMock = (obj) => {
+    const mock = Object.assign({}, obj);
+
+    mock.update = sinon.stub();
+    mock.toJson = sinon.stub().returns(obj);
+    mock.remove = sinon.stub();
+
+    return mock;
+};
+
+const getBannersMock = (banners) => {
+    if (Array.isArray(banners)) {
+        return banners.map(getMock);
+    }
+
+    return getMock(banners);
+};
 
 describe('banner plugin test', () => {
     let plugin;
     let server;
-    let mockStats;
+    let bannerFactoryMock;
+    let bannerMock;
 
     before(() => {
         mockery.enable({
@@ -20,25 +40,36 @@ describe('banner plugin test', () => {
     });
 
     beforeEach((done) => {
-        mockStats = {
-            banner: sinon.stub()
+        bannerFactoryMock = {
+            create: sinon.stub(),
+            get: sinon.stub(),
+            list: sinon.stub()
         };
+
+        bannerMock = getMock(testBanner);
+        bannerMock.remove.resolves(null);
+        bannerMock.update.resolves(bannerMock);
+        bannerFactoryMock.create.resolves(bannerMock);
 
         /* eslint-disable global-require */
         plugin = require('../../plugins/banner');
         /* eslint-enable global-require */
 
         server = new hapi.Server();
+        server.app = {
+            bannerFactory: bannerFactoryMock
+        };
         server.connection({
             port: 1234
         });
 
-        server.register([{
-            register: plugin,
-            options: {
-                executor: mockStats,
-                scm: mockStats
-            }
+        server.auth.scheme('custom', () => ({
+            authenticate: (request, reply) => reply.continue()
+        }));
+        server.auth.strategy('token', 'custom');
+
+        return server.register([{
+            register: plugin
         }], (err) => {
             done(err);
         });
@@ -59,21 +90,21 @@ describe('banner plugin test', () => {
     });
 
     describe('GET /banner', () => {
-        it('returns 200 for a successful yaml', () => {
-            const mockReturn = {
-                foo: 'bar'
-            };
+        let options;
 
-            mockStats.banner.returns(mockReturn);
-
-            return server.inject({
+        beforeEach(() => {
+            options = {
+                method: 'GET',
                 url: '/banner'
-            }).then((reply) => {
+            };
+        });
+
+        it('returns 200 for a successful yaml', () => {
+            bannerFactoryMock.list.resolves(getBannersMock(testBanner));
+
+            return server.inject(options).then((reply) => {
                 assert.equal(reply.statusCode, 200);
-                assert.deepEqual(reply.result, {
-                    executor: mockReturn,
-                    scm: mockReturn
-                });
+                assert.deepEqual(reply.result, testBanner);
             });
         });
     });
