@@ -23,7 +23,7 @@ module.exports = () => ({
         handler: (request, reply) => {
             const { bannerFactory } = request.server.app;
 
-            return bannerFactory.get()
+            return bannerFactory.get({ id: request.banner.id })
                 // something broke, respond with error
                 .catch(err => reply(boom.wrap(err)));
         },

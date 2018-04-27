@@ -31,6 +31,7 @@ describe('banner plugin test', () => {
     let server;
     let bannerFactoryMock;
     let bannerMock;
+    const apiUri = 'http://foo.bar:12345';
 
     before(() => {
         mockery.enable({
@@ -60,7 +61,9 @@ describe('banner plugin test', () => {
             bannerFactory: bannerFactoryMock
         };
         server.connection({
-            port: 1234
+            host: 'localhost',
+            port: 1234,
+            uri: apiUri
         });
 
         server.auth.scheme('custom', () => ({
@@ -68,9 +71,12 @@ describe('banner plugin test', () => {
         }));
         server.auth.strategy('token', 'custom');
 
+        console.log(server);
+
         return server.register([{
             register: plugin
         }], (err) => {
+            console.log('errrrrr');
             done(err);
         });
     });
@@ -85,7 +91,7 @@ describe('banner plugin test', () => {
         mockery.disable();
     });
 
-    it('registers the plugin', () => {
+    it.only('registers the plugin', () => {
         assert.isOk(server.registrations.banner);
     });
 
