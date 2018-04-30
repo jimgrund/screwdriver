@@ -21,7 +21,8 @@ describe.only('banner plugin test', () => {
 
     beforeEach((done) => {
         bannerFactoryMock = {
-            get: sinon.stub()
+            get: sinon.stub(),
+            create: sinon.stub()
         };
 
         /* eslint-disable global-require */
